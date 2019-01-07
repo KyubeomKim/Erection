@@ -2,6 +2,12 @@ extends layout
 
 block content
   //- a(href="/insert") Bet your life more!
+  form(action='/totalupdate', method='post')
+    p
+      label 현재 금액
+      input(type='text', name='total')
+    p
+      input(type='submit', value='총액이 바뀌었다!')
   table
     thead
     tbody

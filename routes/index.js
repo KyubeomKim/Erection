@@ -32,9 +32,7 @@ router.post("/insert", function(req, res, next) {
     let worksheetDashboard = workbook.Sheets["Dashboard"]
 
     var columns = ['A', 'B', 'C', 'D'];
-    console.log(worksheetLog)
     var newIndex = parseInt(worksheetLog['!ref'].split(':')[1].slice(1)) + 1;
-    console.log('kyubeom', newIndex)
     worksheetLog['!ref'] = 'A1:D' + newIndex;
 
     for (var i = 0; i < columns.length; i++) {
@@ -56,6 +54,17 @@ router.post("/insert", function(req, res, next) {
         // write to new file
     XLSX.writeFile(workbook, './data/happy.xlsx');
     res.redirect('/log')
+});
+
+router.post("/totalupdate", function(req, res, next) {
+    let workbook = XLSX.readFile("./data/happy.xlsx")
+    let worksheetDashboard = workbook.Sheets["Dashboard"]
+
+    worksheetDashboard['B7'].v = parseInt(req.body['total'])
+    XLSX_CALC(workbook)
+        // write to new file
+    XLSX.writeFile(workbook, './data/happy.xlsx');
+    res.redirect('/dashboard')
 });
 
 module.exports = router;
