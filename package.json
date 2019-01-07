@@ -9,9 +9,11 @@
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "express": "~4.16.0",
+    "formulajs": "^1.0.8",
     "http-errors": "~1.6.2",
     "jade": "~1.11.0",
     "morgan": "~1.9.0",
-    "xlsx": "^0.14.1"
+    "xlsx": "^0.14.1",
+    "xlsx-calc": "^0.5.7"
   }
 }

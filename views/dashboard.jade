@@ -1,0 +1,34 @@
+extends layout
+
+block content
+  //- a(href="/insert") Bet your life more!
+  table
+    thead
+    tbody
+      tr
+        td 이름
+        td 자본금(USD)
+        td 배분율(%)
+        td 현재 금액(개인)
+        td 총 금액
+      tr
+        td 김규범
+        td #{params[0].seed}
+        td #{params[0].rate}
+        td #{params[0].balance}
+        td #{params[4].seed}
+      tr
+        td 김정수
+        td #{params[1].seed}
+        td #{params[1].rate}
+        td #{params[1].balance}
+      tr
+        td 박성수
+        td #{params[2].seed}
+        td #{params[2].rate}
+        td #{params[2].balance}
+      //- - var columns = Object.keys(object[0]).length
+      //- - for (var i = 0; i < object.length; i++)
+      //-   tr
+      //-   - for (var j = 0; j < columns; j++)
+      //-     td=object[i][Object.keys(object[i])[j]]
