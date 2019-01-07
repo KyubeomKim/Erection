@@ -18,19 +18,27 @@ router.get("/excel", function(req, res, next) {
 router.get("/insert", function(req, res, next) {
     let workbook = XLSX.readFile("./data/happy.xlsx")
     let worksheet = workbook.Sheets["log"]
-        // let cell = worksheet['B7'].v;
-        // console.log(cell)
 
-    // modify value in D4
-    // console.log(worksheet);
-    console.log(worksheet['B2'].v);
-    // worksheet['B7'].t = 's';
-    // worksheet['C1'].t = 's';
-    worksheet['C1'].v = 'Idiot.';
+    var columns = ['A', 'B', 'C', 'D'];
+    var newIndex = parseInt(worksheet['!ref'].split(':')[1].slice(1)) + 1;
+    worksheet['!ref'] = 'A1:D' + newIndex;
 
+    for (var i = 0; i < columns.length; i++) {
+        if (i == 0) {
+            worksheet[columns[i] + newIndex] = {
+                t: 'n',
+                v: newIndex - 1
+            }
+        } else {
+            worksheet[columns[i] + newIndex] = {
+                t: 'n',
+                v: 100
+            }
+        }
+    }
     // write to new file
     XLSX.writeFile(workbook, './data/happy.xlsx');
-    res.render('index', { title: "success!" });
+    res.redirect('/excel')
 });
 
 module.exports = router;
