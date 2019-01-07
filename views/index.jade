@@ -1,0 +1,16 @@
+extends layout
+
+block content
+  table
+    thead
+    tbody
+      tr
+        td No
+        td 김규범
+        td 박성수
+        td 김정수
+      - var columns = Object.keys(object[0]).length
+      - for (var i = 0; i < object.length; i++)
+        tr
+        - for (var j = 0; j < columns; j++)
+          td=object[i][Object.keys(object[i])[j]]
