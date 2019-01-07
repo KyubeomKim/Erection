@@ -1,7 +1,20 @@
 extends layout
 
 block content
-  a(href="/insert") Bet your life more!
+  //- a(href="/insert") Bet your life more!
+  form(action='/insert', method='post')
+    p
+      label 김규범
+      input(type='text', name='player1')
+    p
+      label 김정수
+      input(type='text', name='player2')
+    p
+      label 박성수
+      input(type='text', name='player3')
+    p
+      input(type='submit', value='Bet your life more!')
+      
   table
     thead
     tbody
