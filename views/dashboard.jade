@@ -2,6 +2,24 @@ extends layout
 
 block content
   //- a(href="/insert") Bet your life more!
+  p
+    label 당신은 총..
+  table
+    thead
+    tbody
+      tr
+        td 김규범
+        td 김정수
+        td 박성수
+        tr
+          - for (var i = 0; i < totalProfitList.length; i++)
+            td=totalProfitList[i]
+  p
+    label 만큼 벌었습니다.. 행복합니까?
+  br
+  br
+  br
+
   form(action='/totalupdate', method='post')
     p
       label 현재 금액
@@ -16,23 +34,27 @@ block content
         td 자본금(USD)
         td 배분율(%)
         td 현재 금액(개인)
+        td 순이익
         td 총 금액
       tr
         td 김규범
         td #{params[0].seed}
         td #{params[0].rate}
         td #{params[0].balance}
+        td #{params[0].profit}
         td #{params[4].seed}
       tr
         td 김정수
         td #{params[1].seed}
         td #{params[1].rate}
         td #{params[1].balance}
+        td #{params[1].profit}
       tr
         td 박성수
         td #{params[2].seed}
         td #{params[2].rate}
         td #{params[2].balance}
+        td #{params[2].profit}
       //- - var columns = Object.keys(object[0]).length
       //- - for (var i = 0; i < object.length; i++)
       //-   tr

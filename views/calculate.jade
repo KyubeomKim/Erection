@@ -1,0 +1,21 @@
+extends layout
+
+block content
+  //- a(href="/insert") Bet your life more!
+  form(action='/calculate', method='post')
+    table
+        thead
+        tbody
+        tr
+            td 이름
+            td 배분액
+            td 실배분액
+            td 정산액
+        - for (var i = 0; i < params.length; i++)
+         tr
+            td=params[i].name
+            td=params[i].money
+            td 
+              input(type='text', name='player'+(i))
+            td=params[i].difference
+    input(type='submit', value="Let's destory friendship!")
