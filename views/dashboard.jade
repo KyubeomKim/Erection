@@ -26,6 +26,13 @@ block content
       input(type='text', name='total')
     p
       input(type='submit', value='총액이 바뀌었다!')
+      
+  form(action='/commissionupdate', method='post')
+    p
+      label 수수료
+      input(type='text', name='commission')
+    p
+      input(type='submit', value='짱수를 구해라!')
   table
     thead
     tbody
