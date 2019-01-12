@@ -126,11 +126,9 @@ router.get("/api/dashboard", function(req, res, next) {
     let worksheetDashboard = workbook.Sheets["Dashboard"]
     let worksheetTotal = workbook.Sheets["total"];
 
-    var params = {
-        dashboard: XLSX.utils.sheet_to_json(worksheetDashboard)
-    }
+    var params = XLSX.utils.sheet_to_json(worksheetDashboard)
     for (var i = 2; i < 5; i++) {
-        params['dashboard'][i-2]['totalProfit'] = worksheetTotal["B" + i].v + worksheetDashboard["E" + i].v
+        params[i-2]['totalProfit'] = worksheetTotal["B" + i].v + worksheetDashboard["E" + i].v
     }
 
     res.json(params);
@@ -140,16 +138,14 @@ router.get("/api/calculate", function(req, res, next) {
     let workbook = XLSX.readFile("./data/" + filename)
     let worksheetDashboard = workbook.Sheets["Dashboard"]
     let worksheetTotal = workbook.Sheets["total"];
-    var params ={
-        calculate: []
-    }
+    var params =[]
 
     for (var i = 2; i < 5; i++) {
         var obj = {}
         obj["name"] = worksheetDashboard["A" + i].v;
         obj["money"] = worksheetDashboard["D" + i].v;
         obj["difference"] = worksheetTotal["C" + i].v;
-        params["calculate"].push(obj);
+        params.push(obj);
     }
     res.json(params);
 });
