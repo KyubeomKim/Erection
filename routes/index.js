@@ -1,10 +1,12 @@
 var express = require('express');
 var router = express.Router();
 
+const fs = require('fs');
 const XLSX = require("xlsx");
 const XLSX_CALC = require('xlsx-calc');
 var formulajs = require("formulajs");
-var filename = "happy.xlsx";
+var defaultFilename = "init.xlsx";
+var filename = "data.xlsx";
 XLSX_CALC.import_functions(formulajs)
 
 /* GET home page. */
@@ -75,7 +77,7 @@ router.post("/insert", function(req, res, next) {
     }
     XLSX_CALC(workbook)
         // write to new file
-    XLSX.writeFile(workbook, './data/happy.xlsx');
+    XLSX.writeFile(workbook, './data/' + filename);
     res.redirect('/log')
 });
 
@@ -86,7 +88,7 @@ router.post("/totalupdate", function(req, res, next) {
     worksheetDashboard['B7'].v = (req.body['total'] == '' ? 0 : parseInt(req.body['total']))
     XLSX_CALC(workbook)
         // write to new file
-    XLSX.writeFile(workbook, './data/happy.xlsx');
+    XLSX.writeFile(workbook, './data/' + filename);
     res.redirect('/dashboard')
 });
 
@@ -99,7 +101,7 @@ router.post("/commissionupdate", function(req, res, next) {
     worksheetDashboard['B6'].v = (req.body['commission'] == '' ? 0 : parseFloat(req.body['commission']))
     XLSX_CALC(workbook)
         // write to new file
-    XLSX.writeFile(workbook, './data/happy.xlsx');
+    XLSX.writeFile(workbook, './data/' + filename);
     res.redirect('/dashboard')
 });
 
@@ -117,7 +119,7 @@ router.post("/calculate", function(req, res, next) {
 
     XLSX_CALC(workbook)
         // write to new file
-    XLSX.writeFile(workbook, './data/happy.xlsx');
+    XLSX.writeFile(workbook, './data/' + filename);
     res.redirect('/calculate')
 });
 
@@ -128,7 +130,7 @@ router.get("/api/dashboard", function(req, res, next) {
 
     var params = XLSX.utils.sheet_to_json(worksheetDashboard)
     for (var i = 2; i < 5; i++) {
-        params[i-2]['totalProfit'] = worksheetTotal["B" + i].v + worksheetDashboard["E" + i].v
+        params[i - 2]['totalProfit'] = worksheetTotal["B" + i].v + worksheetDashboard["E" + i].v
     }
 
     res.json(params);
@@ -138,7 +140,7 @@ router.get("/api/calculate", function(req, res, next) {
     let workbook = XLSX.readFile("./data/" + filename)
     let worksheetDashboard = workbook.Sheets["Dashboard"]
     let worksheetTotal = workbook.Sheets["total"];
-    var params =[]
+    var params = []
 
     for (var i = 2; i < 5; i++) {
         var obj = {}
@@ -149,5 +151,29 @@ router.get("/api/calculate", function(req, res, next) {
     }
     res.json(params);
 });
+
+router.get("/api/datalist", function(req, res, next) {
+    var files = [];
+    fs.readdirSync("./data/").forEach(file => {
+        if (file.split(".")[1] == "xlsx") {
+            files.push(file)
+        }
+    })
+    res.json(files);
+});
+
+router.post("/api/filename", function(req, res, next) {
+    filename = req.body['filename']
+    res.json({ filename: filename });
+});
+
+router.post("/api/initdata", function(req, res, next) {
+    filename = req.body['filename']
+    let workbook = XLSX.readFile("./data/" + defaultFilename)
+    XLSX_CALC(workbook)
+    XLSX.writeFile(workbook, './data/' + filename);
+    res.json({ filename: filename });
+});
+
 
 module.exports = router;
