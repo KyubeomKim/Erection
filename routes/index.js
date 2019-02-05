@@ -96,8 +96,6 @@ router.post("/commissionupdate", function(req, res, next) {
     let workbook = XLSX.readFile("./data/" + filename)
     let worksheetDashboard = workbook.Sheets["Dashboard"]
 
-    console.log(req.body['commission'])
-    console.log(typeof(req.body['commission']))
     worksheetDashboard['B6'].v = (req.body['commission'] == '' ? 0 : parseFloat(req.body['commission']))
     XLSX_CALC(workbook)
         // write to new file
@@ -160,6 +158,84 @@ router.get("/api/datalist", function(req, res, next) {
         }
     })
     res.json(files);
+});
+
+router.post("/api/insert", function(req, res, next) {
+    let workbook = XLSX.readFile("./data/" + filename)
+    let worksheetLog = workbook.Sheets["log"]
+    let worksheetDashboard = workbook.Sheets["Dashboard"]
+
+    var columns = ['A', 'B', 'C', 'D'];
+    var newIndex = parseInt(worksheetLog['!ref'].split(':')[1].slice(1)) + 1;
+    worksheetLog['!ref'] = 'A1:D' + newIndex;
+
+    for (var i = 0; i < columns.length; i++) {
+        if (i == 0) {
+            worksheetLog[columns[i] + newIndex] = {
+                t: 'n',
+                v: newIndex - 1
+            }
+        } else {
+            worksheetLog[columns[i] + newIndex] = {
+                t: 'n',
+                v: (req.body['player' + (i)] == '' ? 0 : parseInt(req.body['player' + (i)]))
+            }
+            worksheetDashboard['B' + (i + 1)].v += (req.body['player' + (i)] == '' ? 0 : parseInt(req.body['player' + (i)]))
+            worksheetDashboard['B7'].v += (req.body['player' + (i)] == '' ? 0 : parseInt(req.body['player' + (i)]))
+        }
+    }
+    XLSX_CALC(workbook)
+        // write to new file
+    XLSX.writeFile(workbook, './data/' + filename);
+    res.json({
+        result: "success"
+    })
+});
+
+router.post("/api/totalupdate", function(req, res, next) {
+    let workbook = XLSX.readFile("./data/" + filename)
+    let worksheetDashboard = workbook.Sheets["Dashboard"]
+
+    worksheetDashboard['B7'].v = (req.body['total'] == '' ? 0 : parseInt(req.body['total']))
+    XLSX_CALC(workbook)
+        // write to new file
+    XLSX.writeFile(workbook, './data/' + filename);
+    res.json({
+        result: "success"
+    })
+});
+
+router.post("/api/commissionupdate", function(req, res, next) {
+    let workbook = XLSX.readFile("./data/" + filename)
+    let worksheetDashboard = workbook.Sheets["Dashboard"]
+
+    worksheetDashboard['B6'].v = (req.body['commission'] == '' ? 0 : parseFloat(req.body['commission']))
+    XLSX_CALC(workbook)
+        // write to new file
+    XLSX.writeFile(workbook, './data/' + filename);
+    res.json({
+        result: "success"
+    })
+});
+
+router.post("/api/calculate", function(req, res, next) {
+    let workbook = XLSX.readFile("./data/" + filename)
+    let worksheetDashboard = workbook.Sheets["Dashboard"]
+    let worksheetTotal = workbook.Sheets["total"];
+
+    for (var i = 2; i < 5; i++) {
+        worksheetTotal["B" + i].v += worksheetDashboard["E" + i].v
+        worksheetTotal["C" + i].v += worksheetDashboard["D" + i].v - (req.body['player' + (i - 2)] == '' ? 0 : parseInt(req.body['player' + (i - 2)]));
+        worksheetDashboard["B" + i].v = 0
+    }
+    worksheetDashboard['B7'].v = 0
+
+    XLSX_CALC(workbook)
+        // write to new file
+    XLSX.writeFile(workbook, './data/' + filename);
+    res.json({
+        result: "success"
+    })
 });
 
 router.post("/api/filename", function(req, res, next) {
