@@ -9,6 +9,23 @@ var defaultFilename = "init.xlsx";
 var filename = "data.xlsx";
 XLSX_CALC.import_functions(formulajs)
 
+function calculateCommission() {
+    let workbook = XLSX.readFile("./data/" + filename)
+    let worksheetDashboard = workbook.Sheets["Dashboard"]
+    let worksheetTotal = workbook.Sheets["total"];
+
+    commissionProfitList = [];
+
+    // 규범
+    commissionProfitList.push(worksheetTotal["C2"].v + worksheetTotal["C3"].v*0.25*worksheetTotal["C2"].v/(worksheetTotal["C2"].v+worksheetTotal["C4"].v))
+    // 짱수
+    commissionProfitList.push(worksheetTotal["C3"].v * (1-worksheetDashboard["B6"].v))
+    // 성수
+    commissionProfitList.push(worksheetTotal["C4"].v + worksheetTotal["C3"].v*0.25*worksheetTotal["C4"].v/(worksheetTotal["C2"].v+worksheetTotal["C4"].v))
+    
+    return commissionProfitList;
+}
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
     res.render('result', { message: 'zzz' });
@@ -40,14 +57,12 @@ router.get("/calculate", function(req, res, next) {
     let worksheetDashboard = workbook.Sheets["Dashboard"]
     let worksheetTotal = workbook.Sheets["total"];
     var params = [];
+    var calculateCommissionList = calculateCommission();
 
     for (var i = 2; i < 5; i++) {
         var obj = {}
-        console.log(worksheetTotal)
-        console.log(i)
-        console.log(worksheetTotal["D2"])
         obj["name"] = worksheetDashboard["A" + i].v;
-        obj["money"] = worksheetDashboard["D" + i].v;
+        obj["money"] = worksheetTotal["B" + i].v + calculateCommissionList[i-2];
         obj["difference"] = worksheetTotal["D" + i].v;
         params.push(obj);
     }
@@ -58,6 +73,7 @@ router.post("/insert", function(req, res, next) {
     let workbook = XLSX.readFile("./data/" + filename)
     let worksheetLog = workbook.Sheets["log"]
     let worksheetDashboard = workbook.Sheets["Dashboard"]
+    let worksheetTotal = workbook.Sheets["total"]
 
     var columns = ['A', 'B', 'C', 'D'];
     var newIndex = parseInt(worksheetLog['!ref'].split(':')[1].slice(1)) + 1;
@@ -74,7 +90,11 @@ router.post("/insert", function(req, res, next) {
                 t: 'n',
                 v: (req.body['player' + (i)] == '' ? 0 : parseInt(req.body['player' + (i)]))
             }
+
+            worksheetTotal['C' + (i+1)].v += worksheetDashboard['E' + (i + 1)].v
+            worksheetDashboard['B' + (i + 1)].v = worksheetDashboard['D' + (i + 1)].v
             worksheetDashboard['B' + (i + 1)].v += (req.body['player' + (i)] == '' ? 0 : parseInt(req.body['player' + (i)]))
+            worksheetTotal['B' + (i + 1)].v += (req.body['player' + (i)] == '' ? 0 : parseInt(req.body['player' + (i)]))
             worksheetDashboard['B7'].v += (req.body['player' + (i)] == '' ? 0 : parseInt(req.body['player' + (i)]))
         }
     }
@@ -111,9 +131,12 @@ router.post("/calculate", function(req, res, next) {
     let worksheetDashboard = workbook.Sheets["Dashboard"]
     let worksheetTotal = workbook.Sheets["total"];
 
+    var calculateCommissionList = calculateCommission();
+
+
     for (var i = 2; i < 5; i++) {
         worksheetTotal["C" + i].v += worksheetDashboard["E" + i].v
-        worksheetTotal["D" + i].v += worksheetDashboard["D" + i].v - (req.body['player' + (i - 2)] == '' ? 0 : parseInt(req.body['player' + (i - 2)]));
+        worksheetTotal["D" + i].v += (worksheetTotal["B" + i].v + calculateCommissionList[i-2]) - (req.body['player' + (i - 2)] == '' ? 0 : parseInt(req.body['player' + (i - 2)]));
         worksheetDashboard["B" + i].v = 0
     }
     worksheetDashboard['B7'].v = 0
@@ -141,12 +164,13 @@ router.get("/api/calculate", function(req, res, next) {
     let workbook = XLSX.readFile("./data/" + filename)
     let worksheetDashboard = workbook.Sheets["Dashboard"]
     let worksheetTotal = workbook.Sheets["total"];
+    var calculateCommissionList = calculateCommission();
     var params = []
 
     for (var i = 2; i < 5; i++) {
         var obj = {}
         obj["name"] = worksheetDashboard["A" + i].v;
-        obj["money"] = worksheetDashboard["D" + i].v;
+        obj["money"] = worksheetTotal["B" + i].v + calculateCommissionList[i-2];
         obj["difference"] = worksheetTotal["D" + i].v;
         params.push(obj);
     }
@@ -167,6 +191,7 @@ router.post("/api/insert", function(req, res, next) {
     let workbook = XLSX.readFile("./data/" + filename)
     let worksheetLog = workbook.Sheets["log"]
     let worksheetDashboard = workbook.Sheets["Dashboard"]
+    let worksheetTotal = workbook.Sheets["total"]
 
     var columns = ['A', 'B', 'C', 'D'];
     var newIndex = parseInt(worksheetLog['!ref'].split(':')[1].slice(1)) + 1;
@@ -183,7 +208,11 @@ router.post("/api/insert", function(req, res, next) {
                 t: 'n',
                 v: (req.body['player' + (i)] == '' ? 0 : parseInt(req.body['player' + (i)]))
             }
+
+            worksheetTotal['C' + (i+1)].v += worksheetDashboard['E' + (i + 1)].v
+            worksheetDashboard['B' + (i + 1)].v = worksheetDashboard['D' + (i + 1)].v
             worksheetDashboard['B' + (i + 1)].v += (req.body['player' + (i)] == '' ? 0 : parseInt(req.body['player' + (i)]))
+            worksheetTotal['B' + (i + 1)].v += (req.body['player' + (i)] == '' ? 0 : parseInt(req.body['player' + (i)]))
             worksheetDashboard['B7'].v += (req.body['player' + (i)] == '' ? 0 : parseInt(req.body['player' + (i)]))
         }
     }
@@ -225,10 +254,11 @@ router.post("/api/calculate", function(req, res, next) {
     let workbook = XLSX.readFile("./data/" + filename)
     let worksheetDashboard = workbook.Sheets["Dashboard"]
     let worksheetTotal = workbook.Sheets["total"];
+    var calculateCommissionList = calculateCommission();
 
     for (var i = 2; i < 5; i++) {
         worksheetTotal["C" + i].v += worksheetDashboard["E" + i].v
-        worksheetTotal["D" + i].v += worksheetDashboard["D" + i].v - (req.body['player' + (i - 2)] == '' ? 0 : parseInt(req.body['player' + (i - 2)]));
+        worksheetTotal["D" + i].v += (worksheetTotal["B" + i].v + calculateCommissionList[i-2]) - (req.body['player' + (i - 2)] == '' ? 0 : parseInt(req.body['player' + (i - 2)]));
         worksheetDashboard["B" + i].v = 0
     }
     worksheetDashboard['B7'].v = 0
