@@ -21,7 +21,7 @@ router.get("/dashboard", function(req, res, next) {
 
     var totalProfitList = []
     for (var i = 2; i < 5; i++) {
-        totalProfitList.push(worksheetTotal["B" + i].v + worksheetDashboard["E" + i].v);
+        totalProfitList.push(worksheetTotal["C" + i].v + worksheetDashboard["E" + i].v);
     }
     // console.log(XLSX.utils.sheet_to_json(worksheetDashboard))
 
@@ -45,7 +45,7 @@ router.get("/calculate", function(req, res, next) {
         var obj = {}
         obj["name"] = worksheetDashboard["A" + i].v;
         obj["money"] = worksheetDashboard["D" + i].v;
-        obj["difference"] = worksheetTotal["C" + i].v;
+        obj["difference"] = worksheetTotal["D" + i].v;
         params.push(obj);
     }
     res.render('calculate', { params: params });
@@ -109,8 +109,8 @@ router.post("/calculate", function(req, res, next) {
     let worksheetTotal = workbook.Sheets["total"];
 
     for (var i = 2; i < 5; i++) {
-        worksheetTotal["B" + i].v += worksheetDashboard["E" + i].v
-        worksheetTotal["C" + i].v += worksheetDashboard["D" + i].v - (req.body['player' + (i - 2)] == '' ? 0 : parseInt(req.body['player' + (i - 2)]));
+        worksheetTotal["C" + i].v += worksheetDashboard["E" + i].v
+        worksheetTotal["D" + i].v += worksheetDashboard["D" + i].v - (req.body['player' + (i - 2)] == '' ? 0 : parseInt(req.body['player' + (i - 2)]));
         worksheetDashboard["B" + i].v = 0
     }
     worksheetDashboard['B7'].v = 0
@@ -128,7 +128,7 @@ router.get("/api/dashboard", function(req, res, next) {
 
     var params = XLSX.utils.sheet_to_json(worksheetDashboard)
     for (var i = 2; i < 5; i++) {
-        params[i - 2]['totalProfit'] = worksheetTotal["B" + i].v + worksheetDashboard["E" + i].v
+        params[i - 2]['totalProfit'] = worksheetTotal["C" + i].v + worksheetDashboard["E" + i].v
     }
 
     res.json(params);
@@ -144,7 +144,7 @@ router.get("/api/calculate", function(req, res, next) {
         var obj = {}
         obj["name"] = worksheetDashboard["A" + i].v;
         obj["money"] = worksheetDashboard["D" + i].v;
-        obj["difference"] = worksheetTotal["C" + i].v;
+        obj["difference"] = worksheetTotal["D" + i].v;
         params.push(obj);
     }
     res.json(params);
@@ -224,8 +224,8 @@ router.post("/api/calculate", function(req, res, next) {
     let worksheetTotal = workbook.Sheets["total"];
 
     for (var i = 2; i < 5; i++) {
-        worksheetTotal["B" + i].v += worksheetDashboard["E" + i].v
-        worksheetTotal["C" + i].v += worksheetDashboard["D" + i].v - (req.body['player' + (i - 2)] == '' ? 0 : parseInt(req.body['player' + (i - 2)]));
+        worksheetTotal["C" + i].v += worksheetDashboard["E" + i].v
+        worksheetTotal["D" + i].v += worksheetDashboard["D" + i].v - (req.body['player' + (i - 2)] == '' ? 0 : parseInt(req.body['player' + (i - 2)]));
         worksheetDashboard["B" + i].v = 0
     }
     worksheetDashboard['B7'].v = 0
