@@ -17,11 +17,11 @@ function calculateCommission() {
     commissionProfitList = [];
 
     // 규범
-    commissionProfitList.push(worksheetTotal["C2"].v + worksheetTotal["C3"].v*0.25*worksheetTotal["C2"].v/(worksheetTotal["C2"].v+worksheetTotal["C4"].v))
+    commissionProfitList.push(worksheetTotal["C2"].v + worksheetTotal["C3"].v*0.25*worksheetTotal["C2"].v/(worksheetTotal["C2"].v+worksheetTotal["C4"].v)==0?1:(worksheetTotal["C2"].v+worksheetTotal["C4"].v))
     // 짱수
     commissionProfitList.push(worksheetTotal["C3"].v * (1-worksheetDashboard["B6"].v))
     // 성수
-    commissionProfitList.push(worksheetTotal["C4"].v + worksheetTotal["C3"].v*0.25*worksheetTotal["C4"].v/(worksheetTotal["C2"].v+worksheetTotal["C4"].v))
+    commissionProfitList.push(worksheetTotal["C4"].v + worksheetTotal["C3"].v*0.25*worksheetTotal["C4"].v/(worksheetTotal["C2"].v+worksheetTotal["C4"].v)==0?1:(worksheetTotal["C2"].v+worksheetTotal["C4"].v))
     
     return commissionProfitList;
 }
