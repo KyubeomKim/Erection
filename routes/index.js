@@ -43,6 +43,9 @@ router.get("/calculate", function(req, res, next) {
 
     for (var i = 2; i < 5; i++) {
         var obj = {}
+        console.log(worksheetTotal)
+        console.log(i)
+        console.log(worksheetTotal["D2"])
         obj["name"] = worksheetDashboard["A" + i].v;
         obj["money"] = worksheetDashboard["D" + i].v;
         obj["difference"] = worksheetTotal["D" + i].v;
