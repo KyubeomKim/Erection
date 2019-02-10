@@ -154,12 +154,12 @@ router.get("/api/dashboard", function(req, res, next) {
     let worksheetTotal = workbook.Sheets["total"];
 
     // var params = XLSX.utils.sheet_to_json(worksheetDashboard)
+    // for (var i = 2; i < 5; i++) {
+    //         params[i - 2]['totalProfit'] = worksheetTotal["C" + i].v + worksheetDashboard["E" + i].v
+    //     }
+        
     var params = []
     var calculateCommissionList = calculateCommissionProfit();
-    // for (var i = 2; i < 5; i++) {
-    //     params[i - 2]['totalProfit'] = worksheetTotal["C" + i].v + worksheetDashboard["E" + i].v
-    // }
-
     for (var i = 2; i < 5; i++) {
         var obj ={}
         obj["seed"] = parseFloat(worksheetTotal["B" + i].v.toFixed(2))
@@ -168,6 +168,8 @@ router.get("/api/dashboard", function(req, res, next) {
         obj["profit"] = parseFloat((obj["balance"] - obj["seed"]).toFixed(2))
         params.push(obj)
     }
+    params.push({ "seed": worksheetDashboard["B6"].v })
+    params.push({ "seed": worksheetDashboard["B7"].v })
 
     res.json(params);
 });
