@@ -9,20 +9,22 @@ var defaultFilename = "init.xlsx";
 var filename = "data.xlsx";
 XLSX_CALC.import_functions(formulajs)
 
-function calculateCommission() {
+function calculateCommissionProfit() {
     let workbook = XLSX.readFile("./data/" + filename)
     let worksheetDashboard = workbook.Sheets["Dashboard"]
     let worksheetTotal = workbook.Sheets["total"];
 
     commissionProfitList = [];
 
+    console.log(-((worksheetTotal["C3"].v + worksheetDashboard["E3"].v) * (worksheetDashboard["B6"].v)))
     // 규범
-    commissionProfitList.push(worksheetTotal["C2"].v + worksheetTotal["C3"].v*0.25*worksheetTotal["C2"].v/(worksheetTotal["C2"].v+worksheetTotal["C4"].v)==0?1:(worksheetTotal["C2"].v+worksheetTotal["C4"].v))
+    commissionProfitList.push((worksheetTotal["C3"].v + worksheetDashboard["E3"].v)*0.25*0.5)
     // 짱수
-    commissionProfitList.push(worksheetTotal["C3"].v * (1-worksheetDashboard["B6"].v))
+    commissionProfitList.push(-((worksheetTotal["C3"].v + worksheetDashboard["E3"].v) * (worksheetDashboard["B6"].v)))
     // 성수
-    commissionProfitList.push(worksheetTotal["C4"].v + worksheetTotal["C3"].v*0.25*worksheetTotal["C4"].v/(worksheetTotal["C2"].v+worksheetTotal["C4"].v)==0?1:(worksheetTotal["C2"].v+worksheetTotal["C4"].v))
+    commissionProfitList.push((worksheetTotal["C3"].v + worksheetDashboard["E3"].v)*0.25*0.5)
     
+    console.log(commissionProfitList)
     return commissionProfitList;
 }
 
@@ -57,12 +59,12 @@ router.get("/calculate", function(req, res, next) {
     let worksheetDashboard = workbook.Sheets["Dashboard"]
     let worksheetTotal = workbook.Sheets["total"];
     var params = [];
-    var calculateCommissionList = calculateCommission();
+    var calculateCommissionList = calculateCommissionProfit();
 
     for (var i = 2; i < 5; i++) {
         var obj = {}
         obj["name"] = worksheetDashboard["A" + i].v;
-        obj["money"] = worksheetTotal["B" + i].v + calculateCommissionList[i-2];
+        obj["money"] = worksheetTotal["B" + i].v + calculateCommissionList[i-2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v;
         obj["difference"] = worksheetTotal["D" + i].v;
         params.push(obj);
     }
@@ -90,7 +92,6 @@ router.post("/insert", function(req, res, next) {
                 t: 'n',
                 v: (req.body['player' + (i)] == '' ? 0 : parseInt(req.body['player' + (i)]))
             }
-
             worksheetTotal['C' + (i+1)].v += worksheetDashboard['E' + (i + 1)].v
             worksheetDashboard['B' + (i + 1)].v = worksheetDashboard['D' + (i + 1)].v
             worksheetDashboard['B' + (i + 1)].v += (req.body['player' + (i)] == '' ? 0 : parseInt(req.body['player' + (i)]))
@@ -131,12 +132,12 @@ router.post("/calculate", function(req, res, next) {
     let worksheetDashboard = workbook.Sheets["Dashboard"]
     let worksheetTotal = workbook.Sheets["total"];
 
-    var calculateCommissionList = calculateCommission();
+    var calculateCommissionList = calculateCommissionProfit();
 
 
     for (var i = 2; i < 5; i++) {
+        worksheetTotal["D" + i].v += worksheetTotal["B" + i].v + calculateCommissionList[i-2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v - (req.body['player' + (i - 2)] == '' ? 0 : parseInt(req.body['player' + (i - 2)]));
         worksheetTotal["C" + i].v += worksheetDashboard["E" + i].v
-        worksheetTotal["D" + i].v += (worksheetTotal["B" + i].v + calculateCommissionList[i-2]) - (req.body['player' + (i - 2)] == '' ? 0 : parseInt(req.body['player' + (i - 2)]));
         worksheetDashboard["B" + i].v = 0
     }
     worksheetDashboard['B7'].v = 0
@@ -164,13 +165,13 @@ router.get("/api/calculate", function(req, res, next) {
     let workbook = XLSX.readFile("./data/" + filename)
     let worksheetDashboard = workbook.Sheets["Dashboard"]
     let worksheetTotal = workbook.Sheets["total"];
-    var calculateCommissionList = calculateCommission();
+    var calculateCommissionList = calculateCommissionProfit();
     var params = []
 
     for (var i = 2; i < 5; i++) {
         var obj = {}
         obj["name"] = worksheetDashboard["A" + i].v;
-        obj["money"] = worksheetTotal["B" + i].v + calculateCommissionList[i-2];
+        obj["money"] = worksheetTotal["B" + i].v + calculateCommissionList[i-2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v;
         obj["difference"] = worksheetTotal["D" + i].v;
         params.push(obj);
     }
@@ -254,11 +255,11 @@ router.post("/api/calculate", function(req, res, next) {
     let workbook = XLSX.readFile("./data/" + filename)
     let worksheetDashboard = workbook.Sheets["Dashboard"]
     let worksheetTotal = workbook.Sheets["total"];
-    var calculateCommissionList = calculateCommission();
+    var calculateCommissionList = calculateCommissionProfit();
 
     for (var i = 2; i < 5; i++) {
+        worksheetTotal["D" + i].v += worksheetTotal["B" + i].v + calculateCommissionList[i-2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v - (req.body['player' + (i - 2)] == '' ? 0 : parseInt(req.body['player' + (i - 2)]));
         worksheetTotal["C" + i].v += worksheetDashboard["E" + i].v
-        worksheetTotal["D" + i].v += (worksheetTotal["B" + i].v + calculateCommissionList[i-2]) - (req.body['player' + (i - 2)] == '' ? 0 : parseInt(req.body['player' + (i - 2)]));
         worksheetDashboard["B" + i].v = 0
     }
     worksheetDashboard['B7'].v = 0
