@@ -153,9 +153,20 @@ router.get("/api/dashboard", function(req, res, next) {
     let worksheetDashboard = workbook.Sheets["Dashboard"]
     let worksheetTotal = workbook.Sheets["total"];
 
-    var params = XLSX.utils.sheet_to_json(worksheetDashboard)
+    // var params = XLSX.utils.sheet_to_json(worksheetDashboard)
+    var params = []
+    var calculateCommissionList = calculateCommissionProfit();
+    // for (var i = 2; i < 5; i++) {
+    //     params[i - 2]['totalProfit'] = worksheetTotal["C" + i].v + worksheetDashboard["E" + i].v
+    // }
+
     for (var i = 2; i < 5; i++) {
-        params[i - 2]['totalProfit'] = worksheetTotal["C" + i].v + worksheetDashboard["E" + i].v
+        var obj ={}
+        obj["seed"] = parseFloat(worksheetTotal["B" + i].v.toFixed(2))
+        obj["rate"] = parseFloat(worksheetDashboard["C" + i].v.toFixed(2))
+        obj["balance"] = parseFloat((worksheetTotal["B" + i].v + calculateCommissionList[i-2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v).toFixed(2))
+        obj["profit"] = parseFloat((obj["balance"] - obj["seed"]).toFixed(2))
+        params.push(obj)
     }
 
     res.json(params);
