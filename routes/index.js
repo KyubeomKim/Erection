@@ -17,13 +17,13 @@ function calculateCommissionProfit() {
     commissionProfitList = [];
 
     console.log(-((worksheetTotal["C3"].v + worksheetDashboard["E3"].v) * (worksheetDashboard["B6"].v)))
-    // 규범
-    commissionProfitList.push((worksheetTotal["C3"].v + worksheetDashboard["E3"].v)*0.25*0.5)
-    // 짱수
+        // 규범
+    commissionProfitList.push((worksheetTotal["C3"].v + worksheetDashboard["E3"].v) * 0.25 * 0.5)
+        // 짱수
     commissionProfitList.push(-((worksheetTotal["C3"].v + worksheetDashboard["E3"].v) * (worksheetDashboard["B6"].v)))
-    // 성수
-    commissionProfitList.push((worksheetTotal["C3"].v + worksheetDashboard["E3"].v)*0.25*0.5)
-    
+        // 성수
+    commissionProfitList.push((worksheetTotal["C3"].v + worksheetDashboard["E3"].v) * 0.25 * 0.5)
+
     console.log(commissionProfitList)
     return commissionProfitList;
 }
@@ -64,7 +64,7 @@ router.get("/calculate", function(req, res, next) {
     for (var i = 2; i < 5; i++) {
         var obj = {}
         obj["name"] = worksheetDashboard["A" + i].v;
-        obj["money"] = worksheetTotal["B" + i].v + calculateCommissionList[i-2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v;
+        obj["money"] = worksheetTotal["B" + i].v + calculateCommissionList[i - 2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v;
         obj["difference"] = worksheetTotal["D" + i].v;
         params.push(obj);
     }
@@ -92,7 +92,7 @@ router.post("/insert", function(req, res, next) {
                 t: 'n',
                 v: (req.body['player' + (i)] == '' ? 0 : parseInt(req.body['player' + (i)]))
             }
-            worksheetTotal['C' + (i+1)].v += worksheetDashboard['E' + (i + 1)].v
+            worksheetTotal['C' + (i + 1)].v += worksheetDashboard['E' + (i + 1)].v
             worksheetDashboard['B' + (i + 1)].v = worksheetDashboard['D' + (i + 1)].v
             worksheetDashboard['B' + (i + 1)].v += (req.body['player' + (i)] == '' ? 0 : parseInt(req.body['player' + (i)]))
             worksheetTotal['B' + (i + 1)].v += (req.body['player' + (i)] == '' ? 0 : parseInt(req.body['player' + (i)]))
@@ -128,24 +128,43 @@ router.post("/commissionupdate", function(req, res, next) {
 });
 
 router.post("/calculate", function(req, res, next) {
-    let workbook = XLSX.readFile("./data/" + filename)
-    let worksheetDashboard = workbook.Sheets["Dashboard"]
-    let worksheetTotal = workbook.Sheets["total"];
+    var files = [];
+    fs.readdirSync("./data/").forEach(file => {
+        if (file.split(".")[1] == "xlsx") {
+            files.push(file)
+        }
+    })
+    if (req.body['filename'] != undefined && req.body['filename'] != "" && files.find(file => file === req.body['filename'] + ".xlsx") == undefined) {
+        let workbook = XLSX.readFile("./data/" + filename)
+        let worksheetDashboard = workbook.Sheets["Dashboard"]
+        let worksheetTotal = workbook.Sheets["total"];
 
-    var calculateCommissionList = calculateCommissionProfit();
+        var calculateCommissionList = calculateCommissionProfit();
 
 
-    for (var i = 2; i < 5; i++) {
-        worksheetTotal["D" + i].v += worksheetTotal["B" + i].v + calculateCommissionList[i-2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v - (req.body['player' + (i - 2)] == '' ? 0 : parseInt(req.body['player' + (i - 2)]));
-        worksheetTotal["C" + i].v += worksheetDashboard["E" + i].v
-        worksheetDashboard["B" + i].v = 0
+        for (var i = 2; i < 5; i++) {
+            worksheetTotal["D" + i].v += worksheetTotal["B" + i].v + calculateCommissionList[i - 2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v - (req.body['player' + (i - 2)] == '' ? 0 : parseInt(req.body['player' + (i - 2)]));
+            worksheetTotal["C" + i].v = calculateCommissionList[i - 2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v
+            worksheetDashboard["B" + i].v = 0
+        }
+        worksheetDashboard['B7'].v = 0
+
+        XLSX_CALC(workbook)
+            // write to new file
+        XLSX.writeFile(workbook, './data/' + filename);
+
+        filename = req.body['filename'] + ".xlsx"
+        workbook = XLSX.readFile("./data/" + defaultFilename)
+        XLSX_CALC(workbook)
+        XLSX.writeFile(workbook, './data/' + filename);
+        // res.json({ filename: filename });
+
+        res.redirect('/calculate')
+    } else {
+        // alert("파일명이 입력되지 않았거나 중복, 혹은 올바르지 않은 값 입니다.")
+        // res.redirect('/calculate')
+        res.json({ result: "파일명이 입력되지 않았거나 중복, 혹은 올바르지 않은 값 입니다." });
     }
-    worksheetDashboard['B7'].v = 0
-
-    XLSX_CALC(workbook)
-        // write to new file
-    XLSX.writeFile(workbook, './data/' + filename);
-    res.redirect('/calculate')
 });
 
 router.get("/api/dashboard", function(req, res, next) {
@@ -157,15 +176,32 @@ router.get("/api/dashboard", function(req, res, next) {
     // for (var i = 2; i < 5; i++) {
     //         params[i - 2]['totalProfit'] = worksheetTotal["C" + i].v + worksheetDashboard["E" + i].v
     //     }
-        
+
+    var files = [];
+    fs.readdirSync("./data/").forEach(file => {
+        if (file.split(".")[1] == "xlsx") {
+            if (file != filename) {
+                files.push(file)
+            }
+        }
+    })
+
     var params = []
     var calculateCommissionList = calculateCommissionProfit();
     for (var i = 2; i < 5; i++) {
-        var obj ={}
+        var obj = {}
         obj["seed"] = parseFloat(worksheetTotal["B" + i].v.toFixed(2))
         obj["rate"] = parseFloat(worksheetDashboard["C" + i].v.toFixed(2))
-        obj["balance"] = parseFloat((worksheetTotal["B" + i].v + calculateCommissionList[i-2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v).toFixed(2))
+        obj["balance"] = parseFloat((worksheetTotal["B" + i].v + calculateCommissionList[i - 2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v).toFixed(2))
         obj["profit"] = parseFloat((obj["balance"] - obj["seed"]).toFixed(2))
+        obj["totalProfit"] = obj["balance"] - obj["seed"]
+        console.log(files)
+        files.forEach(file => {
+            let workbook = XLSX.readFile("./data/" + file)
+            let worksheetTotal = workbook.Sheets["total"];
+            obj["totalProfit"] += worksheetTotal["C" + i].v
+        })
+        obj["totalProfit"] = parseFloat(obj["totalProfit"].toFixed(2))
         params.push(obj)
     }
     params.push({ "seed": worksheetDashboard["B6"].v })
@@ -184,7 +220,7 @@ router.get("/api/calculate", function(req, res, next) {
     for (var i = 2; i < 5; i++) {
         var obj = {}
         obj["name"] = worksheetDashboard["A" + i].v;
-        obj["money"] = worksheetTotal["B" + i].v + calculateCommissionList[i-2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v;
+        obj["money"] = worksheetTotal["B" + i].v + calculateCommissionList[i - 2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v;
         obj["difference"] = worksheetTotal["D" + i].v;
         params.push(obj);
     }
@@ -223,7 +259,7 @@ router.post("/api/insert", function(req, res, next) {
                 v: (req.body['player' + (i)] == '' ? 0 : parseInt(req.body['player' + (i)]))
             }
 
-            worksheetTotal['C' + (i+1)].v += worksheetDashboard['E' + (i + 1)].v
+            worksheetTotal['C' + (i + 1)].v += worksheetDashboard['E' + (i + 1)].v
             worksheetDashboard['B' + (i + 1)].v = worksheetDashboard['D' + (i + 1)].v
             worksheetDashboard['B' + (i + 1)].v += (req.body['player' + (i)] == '' ? 0 : parseInt(req.body['player' + (i)]))
             worksheetTotal['B' + (i + 1)].v += (req.body['player' + (i)] == '' ? 0 : parseInt(req.body['player' + (i)]))
@@ -265,24 +301,41 @@ router.post("/api/commissionupdate", function(req, res, next) {
 });
 
 router.post("/api/calculate", function(req, res, next) {
-    let workbook = XLSX.readFile("./data/" + filename)
-    let worksheetDashboard = workbook.Sheets["Dashboard"]
-    let worksheetTotal = workbook.Sheets["total"];
-    var calculateCommissionList = calculateCommissionProfit();
-
-    for (var i = 2; i < 5; i++) {
-        worksheetTotal["D" + i].v += worksheetTotal["B" + i].v + calculateCommissionList[i-2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v - (req.body['player' + (i - 2)] == '' ? 0 : parseInt(req.body['player' + (i - 2)]));
-        worksheetTotal["C" + i].v += worksheetDashboard["E" + i].v
-        worksheetDashboard["B" + i].v = 0
-    }
-    worksheetDashboard['B7'].v = 0
-
-    XLSX_CALC(workbook)
-        // write to new file
-    XLSX.writeFile(workbook, './data/' + filename);
-    res.json({
-        result: "success"
+    var files = [];
+    fs.readdirSync("./data/").forEach(file => {
+        if (file.split(".")[1] == "xlsx") {
+            files.push(file)
+        }
     })
+    if (req.body['filename'] != undefined && req.body['filename'] != "" && files.find(file => file === req.body['filename'] + ".xlsx") == undefined) {
+        let workbook = XLSX.readFile("./data/" + filename)
+        let worksheetDashboard = workbook.Sheets["Dashboard"]
+        let worksheetTotal = workbook.Sheets["total"];
+
+        var calculateCommissionList = calculateCommissionProfit();
+
+
+        for (var i = 2; i < 5; i++) {
+            worksheetTotal["D" + i].v += worksheetTotal["B" + i].v + calculateCommissionList[i - 2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v - (req.body['player' + (i - 2)] == '' ? 0 : parseInt(req.body['player' + (i - 2)]));
+            worksheetTotal["C" + i].v = calculateCommissionList[i - 2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v
+            worksheetDashboard["B" + i].v = 0
+        }
+        worksheetDashboard['B7'].v = 0
+
+        XLSX_CALC(workbook)
+            // write to new file
+        XLSX.writeFile(workbook, './data/' + filename);
+
+        filename = req.body['filename'] + ".xlsx"
+        workbook = XLSX.readFile("./data/" + defaultFilename)
+        XLSX_CALC(workbook)
+        XLSX.writeFile(workbook, './data/' + filename);
+        res.json({ result: "success" });
+    } else {
+        res.json({ result: "파일명이 입력되지 않았거나 중복, 혹은 올바르지 않은 값 입니다." });
+    }
+
+
 });
 
 router.post("/api/filename", function(req, res, next) {
