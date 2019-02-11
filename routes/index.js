@@ -143,7 +143,7 @@ router.post("/calculate", function(req, res, next) {
 
 
         for (var i = 2; i < 5; i++) {
-            worksheetTotal["D" + i].v += worksheetTotal["B" + i].v + calculateCommissionList[i - 2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v - (req.body['player' + (i - 2)] == '' ? 0 : parseInt(req.body['player' + (i - 2)]));
+            worksheetTotal["D" + i].v += worksheetTotal["B" + i].v + calculateCommissionList[i - 2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v - (req.body['player' + (i - 2)] == '' ? 0 : parseFloat(req.body['player' + (i - 2)]));
             worksheetTotal["C" + i].v = calculateCommissionList[i - 2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v
             worksheetDashboard["B" + i].v = 0
         }
@@ -316,7 +316,7 @@ router.post("/api/calculate", function(req, res, next) {
 
 
         for (var i = 2; i < 5; i++) {
-            worksheetTotal["D" + i].v += worksheetTotal["B" + i].v + calculateCommissionList[i - 2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v - (req.body['player' + (i - 2)] == '' ? 0 : parseInt(req.body['player' + (i - 2)]));
+            worksheetTotal["D" + i].v += worksheetTotal["B" + i].v + calculateCommissionList[i - 2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v - (req.body['player' + (i - 2)] == '' ? 0 : parseFloat(req.body['player' + (i - 2)]));
             worksheetTotal["C" + i].v = calculateCommissionList[i - 2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v
             worksheetDashboard["B" + i].v = 0
         }
