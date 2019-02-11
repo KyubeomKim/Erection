@@ -6,7 +6,7 @@ const XLSX = require("xlsx");
 const XLSX_CALC = require('xlsx-calc');
 var formulajs = require("formulajs");
 var defaultFilename = "init.xlsx";
-var filename = "data.xlsx";
+var filename = "";
 XLSX_CALC.import_functions(formulajs)
 
 function calculateCommissionProfit() {
@@ -34,17 +34,21 @@ router.get('/', function(req, res, next) {
 });
 
 router.get("/dashboard", function(req, res, next) {
-    let workbook = XLSX.readFile("./data/" + filename)
-    let worksheetDashboard = workbook.Sheets["Dashboard"]
-    let worksheetTotal = workbook.Sheets["total"];
-
-    var totalProfitList = []
-    for (var i = 2; i < 5; i++) {
-        totalProfitList.push(worksheetTotal["C" + i].v + worksheetDashboard["E" + i].v);
+    if (filename == "") {
+        res.json({ result: "파일을 먼저 등록 해 주세요."})
+    } else {
+        let workbook = XLSX.readFile("./data/" + filename)
+        let worksheetDashboard = workbook.Sheets["Dashboard"]
+        let worksheetTotal = workbook.Sheets["total"];
+    
+        var totalProfitList = []
+        for (var i = 2; i < 5; i++) {
+            totalProfitList.push(worksheetTotal["C" + i].v + worksheetDashboard["E" + i].v);
+        }
+        // console.log(XLSX.utils.sheet_to_json(worksheetDashboard))
+    
+        res.render('dashboard', { params: XLSX.utils.sheet_to_json(worksheetDashboard), totalProfitList: totalProfitList });
     }
-    // console.log(XLSX.utils.sheet_to_json(worksheetDashboard))
-
-    res.render('dashboard', { params: XLSX.utils.sheet_to_json(worksheetDashboard), totalProfitList: totalProfitList });
 });
 
 router.get("/log", function(req, res, next) {
@@ -167,15 +171,22 @@ router.post("/calculate", function(req, res, next) {
     }
 });
 
+router.get("/api/checkinit", function(req, res, next) {
+    if (filename == "") {
+        res.json({
+            result: false, message: "진행 이력이 없습니다. 새로 파일을 작성 해 주세요."
+        })
+    } else {
+        res.json({
+            result: true, message: "success"
+        })
+    }
+})
+
 router.get("/api/dashboard", function(req, res, next) {
     let workbook = XLSX.readFile("./data/" + filename)
     let worksheetDashboard = workbook.Sheets["Dashboard"]
     let worksheetTotal = workbook.Sheets["total"];
-
-    // var params = XLSX.utils.sheet_to_json(worksheetDashboard)
-    // for (var i = 2; i < 5; i++) {
-    //         params[i - 2]['totalProfit'] = worksheetTotal["C" + i].v + worksheetDashboard["E" + i].v
-    //     }
 
     var files = [];
     fs.readdirSync("./data/").forEach(file => {
@@ -270,7 +281,7 @@ router.post("/api/insert", function(req, res, next) {
         // write to new file
     XLSX.writeFile(workbook, './data/' + filename);
     res.json({
-        result: "success"
+        result: true, message: "success"
     })
 });
 
@@ -283,7 +294,7 @@ router.post("/api/totalupdate", function(req, res, next) {
         // write to new file
     XLSX.writeFile(workbook, './data/' + filename);
     res.json({
-        result: "success"
+        result: true, message: "success"
     })
 });
 
@@ -296,7 +307,7 @@ router.post("/api/commissionupdate", function(req, res, next) {
         // write to new file
     XLSX.writeFile(workbook, './data/' + filename);
     res.json({
-        result: "success"
+        result: true, message: "success"
     })
 });
 
@@ -312,39 +323,43 @@ router.post("/api/calculate", function(req, res, next) {
         let worksheetDashboard = workbook.Sheets["Dashboard"]
         let worksheetTotal = workbook.Sheets["total"];
 
+        var newFilename = req.body['filename'] + ".xlsx"
+        let newWorkbook = XLSX.readFile("./data/" + defaultFilename)
+        let newWorksheetTotal = newWorkbook.Sheets["total"];
+        
         var calculateCommissionList = calculateCommissionProfit();
 
 
         for (var i = 2; i < 5; i++) {
             worksheetTotal["D" + i].v += worksheetTotal["B" + i].v + calculateCommissionList[i - 2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v - (req.body['player' + (i - 2)] == '' ? 0 : parseFloat(req.body['player' + (i - 2)]));
+            newWorksheetTotal["D" + i].v = worksheetTotal["D" + i].v
             worksheetTotal["C" + i].v = calculateCommissionList[i - 2] + worksheetDashboard["E" + i].v + worksheetTotal["C" + i].v
             worksheetDashboard["B" + i].v = 0
         }
         worksheetDashboard['B7'].v = 0
 
         XLSX_CALC(workbook)
-            // write to new file
         XLSX.writeFile(workbook, './data/' + filename);
 
-        filename = req.body['filename'] + ".xlsx"
-        workbook = XLSX.readFile("./data/" + defaultFilename)
-        XLSX_CALC(workbook)
-        XLSX.writeFile(workbook, './data/' + filename);
-        res.json({ result: "success" });
+        // workbook = XLSX.readFile("./data/" + defaultFilename)
+        XLSX_CALC(newWorkbook)
+        XLSX.writeFile(newWorkbook, './data/' + newFilename);
+        filename = newFilename
+        res.json({ result: true , message: "success" });
     } else {
-        res.json({ result: "파일명이 입력되지 않았거나 중복, 혹은 올바르지 않은 값 입니다." });
+        res.json({ result: false, message: "파일명이 입력되지 않았거나 중복, 혹은 올바르지 않은 값 입니다." });
     }
 
 
 });
 
 router.post("/api/filename", function(req, res, next) {
-    filename = req.body['filename']
+    filename = req.body['filename'] + ".xlsx"
     res.json({ filename: filename });
 });
 
 router.post("/api/initdata", function(req, res, next) {
-    filename = req.body['filename']
+    filename = req.body['filename'] + ".xlsx"
     let workbook = XLSX.readFile("./data/" + defaultFilename)
     XLSX_CALC(workbook)
     XLSX.writeFile(workbook, './data/' + filename);
