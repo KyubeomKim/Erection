@@ -18,11 +18,11 @@ function calculateCommissionProfit() {
 
     console.log(-((worksheetTotal["C3"].v + worksheetDashboard["E3"].v) * (worksheetDashboard["B6"].v)))
         // 규범
-    commissionProfitList.push((worksheetTotal["C3"].v + worksheetDashboard["E3"].v) * 0.25 * 0.5)
+    commissionProfitList.push((worksheetTotal["C3"].v + worksheetDashboard["E3"].v) * (worksheetDashboard["B6"].v) * 0.5)
         // 짱수
     commissionProfitList.push(-((worksheetTotal["C3"].v + worksheetDashboard["E3"].v) * (worksheetDashboard["B6"].v)))
         // 성수
-    commissionProfitList.push((worksheetTotal["C3"].v + worksheetDashboard["E3"].v) * 0.25 * 0.5)
+    commissionProfitList.push((worksheetTotal["C3"].v + worksheetDashboard["E3"].v) * (worksheetDashboard["B6"].v) * 0.5)
 
     console.log(commissionProfitList)
     return commissionProfitList;
