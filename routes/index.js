@@ -371,6 +371,18 @@ router.post("/api/initdata", function(req, res, next) {
     res.json({ result: true, message: "success" });
 });
 
+router.get("/api/reset", function(req,res,next) {
+    var files = [];
+    fs.readdirSync("./data/").forEach(file => {
+        if (file.split(".")[1] == "xlsx" && file != "init.xlsx") {
+            fs.unlinkSync("./data/"+file)
+        }
+    })
+    filename = ""
+    console.log("filename: " + filename)
+    res.json({ result: true, message: "success" })
+})
+
 router.get("/api/report", function(req, res, next) {
     var reportData = [];
     var calculateCommissionList = calculateCommissionProfit();
