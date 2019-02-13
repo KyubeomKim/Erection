@@ -360,7 +360,7 @@ router.post("/api/calculate", function(req, res, next) {
 
 router.post("/api/filename", function(req, res, next) {
     filename = req.body['filename'] + ".xlsx"
-    res.json({ filename: filename });
+    res.json({ result: true, message: "success" });
 });
 
 router.post("/api/initdata", function(req, res, next) {
@@ -368,7 +368,7 @@ router.post("/api/initdata", function(req, res, next) {
     let workbook = XLSX.readFile("./data/" + defaultFilename)
     XLSX_CALC(workbook)
     XLSX.writeFile(workbook, './data/' + filename);
-    res.json({ filename: filename });
+    res.json({ result: true, message: "success" });
 });
 
 router.get("/api/report", function(req, res, next) {
