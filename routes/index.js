@@ -430,7 +430,7 @@ router.get("/api/report", function(req, res, next) {
             }
         })
     })
-    res.json({ reportData })
+    res.json( reportData )
 })
 
 
