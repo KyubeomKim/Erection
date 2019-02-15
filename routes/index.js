@@ -392,7 +392,7 @@ router.get("/api/report", function(req, res, next) {
             var filedate = file.split(" ")[0]
             if (reportData.length == 0 || reportData[reportData.length - 1]["date"] != filedate) {
                 var obj = {
-                    "date": filedate.substring(3, 7),
+                    "date": filedate.substring(3, 8),
                     "fileList": [
                         file
                     ]
@@ -425,7 +425,7 @@ router.get("/api/report", function(req, res, next) {
                     let worksheetDashboard = workbook.Sheets["Dashboard"];
                     data["totalProfit"]["player" + i] += parseFloat((calculateCommissionList[i] + worksheetDashboard["E" + (i + 2)].v + worksheetTotal["C" + (i + 2)].v).toFixed(2))
                 } else {
-                    data["totalProfit"]["player" + i] += worksheetTotal["C" + (i + 2)].v.toFixed(2)
+                    data["totalProfit"]["player" + i] += parsseFloat(worksheetTotal["C" + (i + 2)].v.toFixed(2))
                 }
             }
         })
