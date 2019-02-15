@@ -371,11 +371,11 @@ router.post("/api/initdata", function(req, res, next) {
     res.json({ result: true, message: "success" });
 });
 
-router.get("/api/reset", function(req,res,next) {
+router.get("/api/reset", function(req, res, next) {
     var files = [];
     fs.readdirSync("./data/").forEach(file => {
         if (file.split(".")[1] == "xlsx" && file != "init.xlsx") {
-            fs.unlinkSync("./data/"+file)
+            fs.unlinkSync("./data/" + file)
         }
     })
     filename = ""
@@ -392,7 +392,7 @@ router.get("/api/report", function(req, res, next) {
             var filedate = file.split(" ")[0]
             if (reportData.length == 0 || reportData[reportData.length - 1]["date"] != filedate) {
                 var obj = {
-                    "date": filedate,
+                    "date": filedate.substring(3, 7),
                     "fileList": [
                         file
                     ]
@@ -425,12 +425,12 @@ router.get("/api/report", function(req, res, next) {
                     let worksheetDashboard = workbook.Sheets["Dashboard"];
                     data["totalProfit"]["player" + i] += parseFloat((calculateCommissionList[i] + worksheetDashboard["E" + (i + 2)].v + worksheetTotal["C" + (i + 2)].v).toFixed(2))
                 } else {
-                    data["totalProfit"]["player" + i] += worksheetTotal["C" + (i + 2)].v
+                    data["totalProfit"]["player" + i] += worksheetTotal["C" + (i + 2)].v.toFixed(2)
                 }
             }
         })
     })
-    res.json( reportData )
+    res.json(reportData)
 })
 
 
