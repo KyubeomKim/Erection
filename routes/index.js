@@ -392,7 +392,7 @@ router.get("/api/report", function(req, res, next) {
             var filedate = file.split(" ")[0]
             if (reportData.length == 0 || reportData[reportData.length - 1]["date"] != filedate) {
                 var obj = {
-                    "date": filedate.substring(3, 8),
+                    "date": filedate,
                     "fileList": [
                         file
                     ]
