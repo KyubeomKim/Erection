@@ -371,11 +371,14 @@ router.post("/api/initdata", function(req, res, next) {
     res.json({ result: true, message: "success" });
 });
 
-router.get("/api/reset", function(req, res, next) {
+router.post("/api/reset", function(req, res, next) {
     var files = [];
+    fs.mkdirSync("./backup/" + req.body['backupName'])
     fs.readdirSync("./data/").forEach(file => {
         if (file.split(".")[1] == "xlsx" && file != "init.xlsx") {
-            fs.unlinkSync("./data/" + file)
+            fs.renameSync("./data/" + file, "./backup/" + req.body['backupName'] + "/" + file, function() {
+                console.log("success: " + file)
+            })
         }
     })
     filename = ""
